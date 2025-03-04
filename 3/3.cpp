@@ -152,7 +152,7 @@ void subtractRow(double* row1, double* row2, int m) {
 
 // Находит строку с максимальным элементом в столбце i
 // и меняет местами со строкой i
-void swapRows(double** matrix, int n, int i) {
+int swapRows(double** matrix, int n, int i) {
     double max = 0;
     int maxindex = 0;
     for (int j = i; j < n; j++) {
@@ -161,11 +161,29 @@ void swapRows(double** matrix, int n, int i) {
             maxindex = j;
         }
     }
+    if (abs(matrix[i][maxindex]) <= 1e-12) {
+        for (int k = i; k < n; k++) {
+            if (abs(matrix[i][k]) >= 1e-12) {
+                return 0;
+            }
+        }
+        for (int j = 0; j < i; j++) {
+            for (int k = 0; k < n; k++) {
+                cout << setw(5) << "x" << k+1 << "*" << matrix[j][k] << " ";
+            }
+            cout << setw(5) << " = " << matrix[j][n] << endl;
+        }
+        cout << endl;
+        return 2;
+    }
 
 
     double* temp = matrix[maxindex];
     matrix[maxindex] = matrix[i];
     matrix[i] = temp;
+
+
+    return 1;
 }
 
 
@@ -194,7 +212,14 @@ void zhmihnutMatrix(double** matrix, int n, int m) {
 // Метод Гаусса, тут всё ясно (как же верим)
 void gaussMethod(double** matrix, int n, int m) {
     for (int i = 0; i < n; i++) {
-        swapRows(matrix, n, i);
+            int temp = swapRows(matrix, n, i);
+            if (!temp) {
+                cout << "No solutions";
+                return;
+            }
+            if (temp == 2) {
+                return;
+            }
         for (int j = i; j < n; j++) {
             divideRow(matrix[j], matrix[j][i], m);
         }
@@ -392,10 +417,12 @@ int main() {
     
     double* row = new double[n];
     for (int i = 0; i < n; i++) {
+        if (abs(row[i]) < 1e-12) {
+            return 0;
+        }
         cout << "x" << i << " = " << matrix[i][m-1] << endl;
         row[i] = matrix[i][m-1];
     }
-
 
     cout << endl;
     matrix = getMatrix(option);
@@ -408,7 +435,11 @@ int main() {
     cout << "Pogreshnosti: \n";
     printVector(row, n);
 
-
+    for  (int i = 0; i < n; i++) {
+        delete[]matrix[i];
+    }
+    delete[]matrix;
+    delete[]row;
     return 0;
 }
 
