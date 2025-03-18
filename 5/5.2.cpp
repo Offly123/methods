@@ -18,25 +18,22 @@ void printVector(double* vector, int n) {
 
 // Выводит матрицу по размерам
 void printMatrix(double** matrix, int n, int m) {
-    cout << "N = " << n << "\n";
     for (int i = 0; i < n; i++) {
         // cout << "i = " << i << "\n";
         for (int j = 0; j < m; j++) {
-            cout << setw(13) << matrix[i][j] << " ";
+            cout << setw(8) << matrix[i][j] << " ";
         }
         cout << endl;
     }
-    cout << "hehe\n";
     cout << endl;
 }
 
 
+// Суёт матрицу в файл hehe.txt.
+// Вроде используется только для запихивания
+// значений сплайна.
 void matrixInFile(double** matrix, int n, int m) {
-    cout << "hehe3\n";
     ofstream filefile("hehe.txt");
-    cout << "hehe4\n";
-    // filefile.open("hehe.txt");
-    // cout << "hehe5\n";
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             filefile << matrix[i][j] << "\t";
@@ -48,11 +45,13 @@ void matrixInFile(double** matrix, int n, int m) {
 }
 
 
+// Очищает память от вектора (полезно)
 void clearMemory(double* vect) {
     delete[]vect;
 }
 
 
+// Очищает память от матрицы (полезно)
 void clearMemory(double** matrix, int n) {
     for (int i = 0; i < n; i++) {
         delete[]matrix[i];
@@ -62,7 +61,8 @@ void clearMemory(double** matrix, int n) {
 
 
 // Получает статическую матрицу размеров NxM и вжмыхивает
-// её в динамическую
+// её в динамическую (бесполезное камео из 3-ей задачи.
+// Можно удалить, но мне жалко).
 template <int N, int M>
 double** staticToDynamic(double templ[N][M]) {
     double** matrix = new double* [N];
@@ -76,12 +76,15 @@ double** staticToDynamic(double templ[N][M]) {
 }
 
 
-// Значение функции в точке х
+// Значение функции в точке x
 double calculateFunction(double x) {
     return 1 / (1 + 25 * pow(x, 2));
 }
 
 
+// Делает вместо y1 - 
+// y1 - 2*y2 + y3
+// Так надо в судя по умной книжке
 void transformValues(double* values, int n) {
     for (int i = 1; i < n - 1; i++) {
         values[i] = values[i] - 2 * values[i + 1] + values[i + 2];
@@ -90,15 +93,16 @@ void transformValues(double* values, int n) {
 
 
 // Возвращает таблицу значений функции
+// если просто подставлять x
 double* getYValues(int n) {
     n--;
     double* values = new double[n];
-    for (int i = 0; i <= n; i++) {
+    for (int i = 0; i < n; i++) {
         values[i] = calculateFunction(-1 + (2.0 / n) * i);
-        // Я не знаю почему, но если убрать тут вывод
-        // то программа ломается
-        cout << "teamFortress2 coconut.png\n";
-        cout << "x = " << -1 + (2.0 / n) * i << "\n";
+        // Это кокос. Если убрать его отсюда, то программа
+        // начнёт ломаться при вводе чётных n.
+        // Я не знаю почему, не трогайте кокос.
+        cout << "coconut.png ";
     }
     return values;
 }
@@ -112,15 +116,15 @@ double* getYValues(int n) {
 // {0, 0, 0, ..., 4, 1, 0, y}
 // {0, 0, 0, ..., 1, 4, 1, y}
 // {0, 0, 0, ..., 0, 1, 4, y}
-// Вместо y - (y1 - 2*y2 + y3)
+// Вместо y - 
+// (y1 - 2*y2 + y3)
+// Размеры вроде N-2 на M
 double** getMatrix(int n, int m) {
     double** matrix = new double*[n];
     double* values = getYValues(n + 2);
     cout << "Basic values:\n";
-    printVector(values, n + 2);
     transformValues(values, n + 2);
     cout << "Transformed values:\n";
-    printVector(values, n + 2);
     for (int i = 0; i < n; i++) {
         matrix[i] = new double[m];
     }
@@ -172,7 +176,9 @@ void swapRows(double** matrix, int n, int i) {
 }
 
 
-// Жмых
+// Жмых (камео из 3-ей задачи)
+// Переворачивает матрицу сначала вертикально,
+// a потом горизонтально
 void zhmihnutMatrix(double** matrix, int n, int m) {
     m--;
     for (int i = 0; i < n / 2; i++) {
@@ -190,7 +196,7 @@ void zhmihnutMatrix(double** matrix, int n, int m) {
 }
 
 
-// Метод Гаусса, тут всё ясно (как же верим)
+// Метод Гаусса (камео из 3-ей задачи)
 void gaussMethod(double** matrix, int n, int m) {
     for (int i = 0; i < n; i++) {
         swapRows(matrix, n, i);
@@ -226,6 +232,8 @@ void gaussMethod(double** matrix, int n, int m) {
 }
 
 
+// Находит коэффициенты a, b, c, d
+// для каждого промежутка
 double* getABCDVector(
     double m1, double m2, 
     double y1, double y2, 
@@ -238,11 +246,12 @@ double* getABCDVector(
     vector[1] = m1 / 2;
     vector[2] = (y2-y1) / h - (h * (m2 + 2 * m1)) / 6;
     vector[3] = y1;
-    printVector(vector, n);
     return vector;
 }
 
 
+// По идее находит матрицу коэффициентов
+// a, b, c, d
 double** getABCDMatrix(double* mValues, int n) {
     double* values = getYValues(n + 1);
     double** matrix = new double*[n];
@@ -258,34 +267,32 @@ double** getABCDMatrix(double* mValues, int n) {
 }
 
 
+// Считает непонятно что по коэффициентам abcd
+// Вроде Y, но название функции говорит что X,
+// впадлу разбираться
 double getXByABCD(double* abcd, double x, double xi) {
     return  abcd[0]*pow((x - xi), 3) + 
-            abcd[1]*pow((x - xi), 2) + 
-            abcd[2]*pow((x - xi), 1) +
-            abcd[3];
+        abcd[1]*pow((x - xi), 2) + 
+        abcd[2]*pow((x - xi), 1) +
+        abcd[3];
 }
 
 
+// Получает коэффициенты a, b, c, d и записывает
+// значения сплайна в файл
 double** getYBySpline(int n, double** abcd) {
     double** matrix = new double*[n * 10];
-    cout << n << "\n";
     for (int i = 0; i < n * 10; i++) {
         matrix[i] = new double[2];
     }
     for (int i = 0; i < n; i++) {
-        cout << "i = " << i << "\n";
         double xi = -1 + ((2.0 / n) * i);
         for (int j = 0; j < 10; j++) {
-            cout << "j = " << j << "\n";
             double x = -1 + ((2.0 / n) * i) + ((2.0 * j) / (n * 10));
             matrix[i*10 + j][0] = x;
             matrix[i*10 + j][1] = getXByABCD(abcd[i], x, xi);
         }
-        // cout << "\n";
     }
-    cout << "hehe\n";
-    // printMatrix(matrix, n * 10, 2);
-    cout << "hehe2\n";
     matrixInFile(matrix, n * 10, 2);
 
     return matrix;
@@ -294,6 +301,12 @@ double** getYBySpline(int n, double** abcd) {
 
 // Пяу пипяу пипяу пипяупяу
 int main() {
+    // Получает n и строит матрицу
+    //
+    // ВАЖНО:
+    // При чётных n программа ломается и
+    // я понятия не имею почему. Просто не вводите
+    // чётные n.
     int n;
     cin >> n;
     int m = n + 1;
@@ -302,7 +315,9 @@ int main() {
     printMatrix(matrix, n, m);
 
 
-    // Находим значения Mi, записываем в вектор
+    // Находим значения Mi, записываем в вектор.
+    // вектор[0] и вектор[n-1] равны 0, потому что
+    // там в умной книжке написано что так надо.
     cout << "Gauss:\n";
     gaussMethod(matrix, n, m);
     printMatrix(matrix, n, m);
@@ -316,16 +331,41 @@ int main() {
     m = 4;
     clearMemory(matrix, n - 2);
     n--;
+
+
+    // Получеаем коэффициенты a, b, c, d для каждого
+    // промежутка.
     double** abcdMatrix = getABCDMatrix(mValues, n);
     cout << "ABCD values:\n";
     printMatrix(abcdMatrix, n, m);
+
+
+    // Находим значения функции по коэффициентам 
+    // при помощи сплайна. Тут же записываем их в
+    // hehe.txt (я не знаю почему не .csv)
     getYBySpline(n, abcdMatrix);
 
+
+    // Записываем значения функции в real.csv
+    // если просто подставить в функцию x
     double* realValues = getYValues(n);
-    cout << n;
     ofstream real("real.csv");
     for (int i = 0; i < n * 10; i++) {
-        real << calculateFunction(-1 + (2.0 / (n * 10.0))*i);
+        real << -1 + (2.0 / (n * 10.0)) * i << "\t";
+        real << calculateFunction(-1 + (2.0 / (n * 10.0)) * i);
+        real << "\n";
     }
-    clearMemory(mValues);
+
+
+    // Тут как бы надо почистить память но мне лень.
+    // A чё за рандомные изменения n вообще не спрашивайте.
+    // A кто вы то? Я один тут.
+    return 0;
 }
+
+
+// Умная книжка
+// https://web.archive.org/web/20090408054627/http://online.redwoods.cc.ca.us/instruct/darnold/laproj/Fall98/SkyMeg/Proj.PDF
+
+
+// Слава кокосу.
