@@ -29,7 +29,7 @@ void printMatrix(double** matrix, int n, int m) {
 }
 
 
-// Суёт матрицу в файл hehe.txt.
+// Суёт матрицу в файл 5.3.csv.
 // Вроде используется только для запихивания
 // значений сплайна.
 void matrixInFile(double** matrix, int n, int m) {
@@ -62,10 +62,10 @@ void clearMemory(double** matrix, int n) {
 
 // Делает вместо y1 - 
 // y1 - 2*y2 + y3
-// Так надо в судя по умной книжке
+// Так сказано в умной книжке
 void transformValues(double* values, int n) {
-    for (int i = 0; i < n - 2; i++) {
-        values[i] = values[i] - 2 * values[i + 1] + values[i + 2];
+    for (int i = 1; i < n - 1; i++) {
+        values[i] = (values[i-1] - 2 * values[i] + values[i + 1]) * 6 / 2.5;
     }
 }
 
@@ -89,6 +89,7 @@ double* getYValues() {
 // {0, 0, 0, ..., 4, 1, 0, y}
 // {0, 0, 0, ..., 1, 4, 1, y}
 // {0, 0, 0, ..., 0, 1, 4, y}
+// Так сказано в умной книжке
 // Вместо y - 
 // (y1 - 2*y2 + y3)
 // Размеры вроде N-2 на M
@@ -96,9 +97,13 @@ double** getMatrix() {
     int n = 2;
     int m = 3;
     double** matrix = new double*[n];
-    cout << "hehe\n";
+    // Тут тоже кокос, не удалять
+    cout << "coconut.png\n";
     double* values = getYValues();
     printVector(values, 4);
+    for (int i = 0; i < 3; i++) {
+
+    }
     transformValues(values, 4);
     printVector(values, 4);
     for (int i = 0; i < n; i++) {
@@ -213,11 +218,11 @@ void gaussMethod(double** matrix, int n, int m) {
 double* getABCDVector(
     double m1, double m2, 
     double y1, double y2, 
-    int n
+    double h
 ) {
-    double h = 2.0 / n;
-    n-=2;
     double* vector = new double[4];
+    cout << "m1 = " << m1 << "\nm2 = " << m2 << "\n";
+    cout << "y1 = " << y1 << "\ny2 = " << y2 << "\n";
     vector[0] = (m2 - m1) / (6 * h);
     vector[1] = m1 / 2;
     vector[2] = (y2-y1) / h - (h * (m2 + 2 * m1)) / 6;
@@ -226,30 +231,46 @@ double* getABCDVector(
 }
 
 
-// По идее находит матрицу коэффициентов
-// a, b, c, d
+// Находит матрицу коэффициентов a, b, c, d
 double** getABCDMatrix(double* mValues, int n) {
-    // Кокос вечен (если его удалить всё
-    // снова сломается)
-    cout << "coconut.png ";
-    double* values = getYValues();
+    // Кокос вечен
+    cout << "coconut.png\n";
+    double* yValues = getYValues();
     double** matrix = new double*[n];
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < 3; i++) {
         matrix[i] = new double[4];
-        matrix[i] = getABCDVector(
-            mValues[i], mValues[i+1],
-            values[i], values[i+1],
-            n
-        );
+        // cout << "i = " << i << "\n";
+        if (i == 0) {
+            matrix[i] = getABCDVector(
+                mValues[0], mValues[1],
+                yValues[0], yValues[1],
+                1
+            );
+            continue;
+        }
+        if (i == 1) {
+            matrix[i] = getABCDVector(
+                mValues[1], mValues[2],
+                yValues[1], yValues[2],
+                2
+            );
+            continue;
+        }
+        if (i == 2) {
+            matrix[i] = getABCDVector(
+                mValues[2], mValues[3],
+                yValues[2], yValues[3],
+                2
+            );
+            continue;
+        }
     }
     return matrix;
 }
 
 
-// Считает непонятно что по коэффициентам abcd
-// Вроде Y, но название функции говорит что X,
-// впадлу разбираться
-double getXByABCD(double* abcd, double x, double xi) {
+// Считает y по коэффициентам a, b, c, d сплайна
+double getYByABCD(double* abcd, double x, double xi) {
     return  abcd[0]*pow((x - xi), 3) + 
         abcd[1]*pow((x - xi), 2) + 
         abcd[2]*pow((x - xi), 1) +
@@ -272,7 +293,7 @@ double** getYBySpline(int n, double** abcd) {
             cout << "x = " << x << "\n";
             cout << "xi = " << xi << "\n";
             matrix[i][0] = x;
-            matrix[i][1] = getXByABCD(abcd[0], x, xi);
+            matrix[i][1] = getYByABCD(abcd[0], x, xi);
             continue;
         }
         if (i < 20) {
@@ -281,7 +302,7 @@ double** getYBySpline(int n, double** abcd) {
             cout << "x = " << x << "\n";
             cout << "xi = " << xi << "\n";
             matrix[i][0] = x;
-            matrix[i][1] = getXByABCD(abcd[1], x, xi);
+            matrix[i][1] = getYByABCD(abcd[1], x, xi);
             continue;
         }
         if (i < 30) {
@@ -290,7 +311,7 @@ double** getYBySpline(int n, double** abcd) {
             cout << "x = " << x << "\n";
             cout << "xi = " << xi << "\n";
             matrix[i][0] = x;
-            matrix[i][1] = getXByABCD(abcd[2], x, xi);
+            matrix[i][1] = getYByABCD(abcd[2], x, xi);
             continue;
         }
     }
